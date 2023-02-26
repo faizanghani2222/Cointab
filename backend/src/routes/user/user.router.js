@@ -70,24 +70,14 @@ app.get("/user-list", async(req,res)=>{
     try{
        const{page,gender}=req.query
        let s=(page-1)*10
-       let users,count
-       User.count({}, function(err, docCount) {
-        if(err){ 
-            res.status(401).send({message:"error",error:e})
-            return;
-        }else{
-            count=docCount;
-        }
-       })
+       let users=await User.find()
+       let count=users.length
             if(gender){
                 users=await User.find({gender:gender}).skip(s).limit(10)
             }else{
                 users=await User.find().skip(s).limit(10)
             }
-            console.log(count)
             res.send({users:users,total:count})
-        
-    
       
     }catch(e){
         res.status(401).send({message:"error",error:e})
