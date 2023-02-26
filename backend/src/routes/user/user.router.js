@@ -76,7 +76,16 @@ app.get("/user-list", async(req,res)=>{
       }else{
          users=await User.find().skip(s).limit(10)
       }
-      res.send(users)
+      
+      User.countDocuments({}, function(err, docCount) {
+        if(err){ 
+            res.status(401).send({message:"error",error:e})
+            return;
+        }else{
+            res.send({users:users,total:docCount})
+        }
+    })
+      
     }catch(e){
         res.status(401).send({message:"error",error:e})
     }
