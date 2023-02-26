@@ -71,7 +71,7 @@ app.get("/user-list", async(req,res)=>{
        const{page,gender}=req.query
        let s=(page-1)*10
        let users,count
-       User.countDocuments({}, function(err, docCount) {
+       User.count({}, function(err, docCount) {
         if(err){ 
             res.status(401).send({message:"error",error:e})
             return;
