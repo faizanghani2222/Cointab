@@ -1,7 +1,6 @@
-import { Box, Button, Heading, Image, useDisclosure } from '@chakra-ui/react';
-import React, { useContext, useState } from 'react';
+import { Box, Button, Heading, Image, Spinner, useDisclosure } from '@chakra-ui/react';
+import React, {useState } from 'react';
 import { Link } from 'react-router-dom';
-import { AppContext } from '../Context/AppContext';
 import {
     Modal,
     ModalOverlay,
@@ -15,19 +14,37 @@ import axios from 'axios';
 
 function Dashboard() {
 
- 
     const [loading,setLoading]=useState(false)
     const { isOpen, onOpen, onClose } = useDisclosure()
-    const [data,setData]=useState([{"gender":"male","name":{"title":"Mr","first":"Renato","last":"Stevens"},"location":{"street":{"number":1130,"name":"Breslauer Straße"},"city":"Fürth","state":"Rheinland-Pfalz","country":"Germany","postcode":59772,"coordinates":{"latitude":"-53.3234","longitude":"-175.3227"},"timezone":{"offset":"+5:00","description":"Ekaterinburg, Islamabad, Karachi, Tashkent"}},"email":"renato.stevens@example.com","login":{"uuid":"cda124a8-b195-4ef2-839a-995c67bbf6c9","username":"organicmouse659","password":"carmen","salt":"TfJv38js","md5":"b4b3d9a13400de4e671af8cc3ed83740","sha1":"be24774308db97594389cfa0d0490d6c3a2e8564","sha256":"df28bec196ab8f2af282bc2682e9e499503c8a9abccd0305fc24a08d710ab20c"},"dob":{"date":"1979-09-29T17:43:24.261Z","age":43},"registered":{"date":"2009-02-15T17:32:21.587Z","age":14},"phone":"0347-6947517","cell":"0170-1206802","id":{"name":"SVNR","value":"46 290979 S 357"},"picture":{"large":"https://randomuser.me/api/portraits/men/77.jpg","medium":"https://randomuser.me/api/portraits/med/men/77.jpg","thumbnail":"https://randomuser.me/api/portraits/thumb/men/77.jpg"},"nat":"DE"},{"gender":"male","name":{"title":"Mr","first":"Renato","last":"Stevens"},"location":{"street":{"number":1130,"name":"Breslauer Straße"},"city":"Fürth","state":"Rheinland-Pfalz","country":"Germany","postcode":59772,"coordinates":{"latitude":"-53.3234","longitude":"-175.3227"},"timezone":{"offset":"+5:00","description":"Ekaterinburg, Islamabad, Karachi, Tashkent"}},"email":"renato.stevens@example.com","login":{"uuid":"cda124a8-b195-4ef2-839a-995c67bbf6c9","username":"organicmouse659","password":"carmen","salt":"TfJv38js","md5":"b4b3d9a13400de4e671af8cc3ed83740","sha1":"be24774308db97594389cfa0d0490d6c3a2e8564","sha256":"df28bec196ab8f2af282bc2682e9e499503c8a9abccd0305fc24a08d710ab20c"},"dob":{"date":"1979-09-29T17:43:24.261Z","age":43},"registered":{"date":"2009-02-15T17:32:21.587Z","age":14},"phone":"0347-6947517","cell":"0170-1206802","id":{"name":"SVNR","value":"46 290979 S 357"},"picture":{"large":"https://randomuser.me/api/portraits/men/77.jpg","medium":"https://randomuser.me/api/portraits/med/men/77.jpg","thumbnail":"https://randomuser.me/api/portraits/thumb/men/77.jpg"},"nat":"DE"}])
+    const [data,setData]=useState([])
 
     const handleFetch=()=>{
-       
+      if(loading===false){
+        setLoading(true)
+        axios.get("https://cointab-up43.onrender.com").then((res)=>{
+          setData(res.data)
+           setLoading(false)
+        }).catch((err)=>{
+         alert("Error try again")
+         setLoading(false)
+         })
+      }else{
+        alert("Error fetching users still in progress")
+      }
     }
 
-    
-
-   
-
+    const handleDelete=()=>{
+        setLoading(true)
+        axios.delete("https://cointab-up43.onrender.com/delete-users").then((res)=>{
+            setData([])
+            setLoading(false)
+            onClose()
+        }).catch((err)=>{
+            alert("Error try again")
+            setLoading(false)
+            onClose()
+        })
+    }
 
 
     return (
@@ -41,14 +58,25 @@ function Dashboard() {
                 </Box>
             </Box>
 
-            <Box width="70%" m="auto" mt="40px">
-                {data && data.map((el)=>{
-                    return <Box mb="15px" display="flex" gap="20px" alignItems="center">
-                                <Image borderRadius="50%" src={el.picture.thumbnail} alt="thumbnail"/>
-                                <Heading fontWeight="500" fontSize="24px">{el.name.title} {el.name.first} {el.name.last}</Heading>
-                           </Box>
-                })}
-            </Box>
+            { loading?<Box w={"60%"} m="auto" mt="20vh" textAlign="center">
+                        <Spinner
+                            thickness='4px'
+                            speed='0.65s'
+                            emptyColor='gray.200'
+                            color='blue.500'
+                            size='xl'
+                            />
+                        </Box>
+                :
+                    <Box width="70%" m="auto" mt="40px">
+                        {data && data.map((el,i)=>{
+                            return <Box key={i} mb="15px" display="flex" gap="20px" alignItems="center">
+                                        <Image borderRadius="50%" src={el.picture.thumbnail} alt="thumbnail"/>
+                                        <Heading fontWeight="500" fontSize="24px">{el.name.title} {el.name.first} {el.name.last}</Heading>
+                                </Box>
+                        })}
+                    </Box>
+            }
             
 
                 <Modal isOpen={isOpen} onClose={onClose}>
@@ -58,7 +86,7 @@ function Dashboard() {
                             <ModalCloseButton />
 
                             <ModalFooter>
-                                <Button colorScheme='red' mr={3}>
+                                <Button onClick={handleDelete} colorScheme='red' mr={3}>
                                 Delete
                                 </Button>
                                 <Button  onClick={onClose} variant='ghost'>Cancel</Button>
